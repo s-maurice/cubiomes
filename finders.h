@@ -61,8 +61,8 @@ static const StructureConfig SWAMP_HUT_CONFIG      = { 14357620, 32, 24, 0};
 
 static const StructureConfig OUTPOST_CONFIG        = {165745296, 32, 24, 0};
 static const StructureConfig VILLAGE_CONFIG        = { 10387312, 32, 24, 0};
-static const StructureConfig OCEAN_RUIN_CONFIG     = { 14357621, 20, 12, 0};
-static const StructureConfig SHIPWRECK_CONFIG      = {165745295, 24, 20, 0};
+static const StructureConfig OCEAN_RUIN_CONFIG     = { 14357621, 20, 12, 0};  // diff from code
+static const StructureConfig SHIPWRECK_CONFIG      = {165745295, 24, 20, 0};  // diff from code
 static const StructureConfig MONUMENT_CONFIG       = { 10387313, 32, 27, LARGE_STRUCT};
 static const StructureConfig MANSION_CONFIG        = { 10387319, 80, 60, LARGE_STRUCT};
 static const StructureConfig RUINED_PORTAL_CONFIG  = { 34222645, 40, 25, 0}; // overworld variant
@@ -279,6 +279,9 @@ Pos getLargeStructureChunkInRegion(const StructureConfig config, int64_t seed,
  */
 int isMineshaftChunk(int64_t seed, const int chunkX, const int chunkZ);
 int isTreasureChunk(int64_t seed, const int chunkX, const int chunkZ);
+
+void setStructureSeed(int64_t *seed, int chunkX, int chunkZ);
+void setStructureSeedWithOffset(int64_t *seed, int chunkX, int chunkZ, int64_t seedModifier);
 
 
 //==============================================================================

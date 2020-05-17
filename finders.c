@@ -787,13 +787,46 @@ void search4QuadBases(const char *fnam, const int threads,
 // Finding Structure Positions
 //==============================================================================
 
+// equlivilant to setStructureSeed() WITHOUT seed modifier in ChunkRandom
+void setStructureSeed(int64_t *seed, int chunkX, int chunkZ) {
+    int64_t worldSeed;
+    memcpy(&worldSeed, seed, sizeof(int64_t));
+
+    setSeed(seed);
+    int64_t l = nextLong(seed);
+    int64_t m = nextLong(seed);
+    *seed = (int64_t)chunkX * l ^ (int64_t)chunkZ * m ^ worldSeed;
+
+    setSeed(seed);
+}
+
+// equlivilant to setStructureSeed() WITH seed modifier in ChunkRandom
+// untested
+void setStructureSeedWithOffset(int64_t *seed, int chunkX, int chunkZ, int64_t seedModifier) {
+
+    long l = chunkX * 341873128712 + chunkZ * 132897987541 + *seed + seedModifier;
+
+    *seed = l;
+
+    setSeed(seed);
+}
+
+//untested
+int getStructureRotation(int64_t *seed, int chunkX, int chunkZ) {
+    // Rotatiion for AbstractTempleTypes is simply the first call to nextInt(4) after setting the structure seed.
+    // 0-indexed: north, east, south, west for return values
+
+    setStructureSeed(seed, chunkX, chunkZ);
+    return nextInt(seed, 4);
+
+}
 
 Pos getStructurePos(const StructureConfig config, int64_t seed,
         const int regionX, const int regionZ)
 {
     Pos pos;
 
-    // set seed
+    // set seed - equlivilant to setStructureSeed() WITH seed modifier in ChunkRandom
     seed = regionX*341873128712 + regionZ*132897987541 + seed + config.seed;
     seed = (seed ^ 0x5deece66dLL);// & ((1LL << 48) - 1);
 
@@ -819,6 +852,36 @@ Pos getStructurePos(const StructureConfig config, int64_t seed,
     // at block position (9,9) within chunk. [CHECK: maybe (8,8) in 1.7]
     pos.x = ((regionX*config.regionSize + pos.x) << 4) + 9;
     pos.z = ((regionZ*config.regionSize + pos.z) << 4) + 9;
+
+    // to get direction - setStructureSeed - call long twice, then int - or just int
+
+    // posability 1 - two longs followed by int for direction
+    int64_t *seed2 = malloc(sizeof(int64_t));
+    *seed2 = -1614536902600909162; // world seed
+    setStructureSeed(seed2, pos.x >> 4, pos.z >> 4); // get back to chunk coords
+
+    printf("seed 1, %" PRId64 "\n", *seed2);
+
+    nextLong(seed2);
+    printf("seed 2, %" PRId64 "\n", *seed2);
+
+    nextLong(seed2);
+    printf("seed 2, %" PRId64 "\n", *seed2);
+
+    printf("%d\n", nextInt(seed2, 4));
+    printf("seed 3, %" PRId64 "\n", *seed2);
+    printf("\n");
+
+    // posability 2 - set and then int
+    int64_t *seed3 = malloc(sizeof(int64_t));
+    *seed3 = -1614536902600909162; // world seed
+    setStructureSeed(seed3, pos.x >> 4, pos.z >> 4); // get back to chunk coords
+    printf("seed 1, %" PRId64 "\n", *seed3);
+
+    printf("%d\n", nextInt(seed3, 4));
+    printf("seed 2, %" PRId64 "\n", *seed3);
+    printf("\n");
+
     return pos;
 }
 
